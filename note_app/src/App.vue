@@ -2,16 +2,42 @@
   import {ref} from "vue"
 
   const showModal = ref(false)
+  const newNote = ref("")
+  const errorMessage = ref("")
+  const notes = ref([])
+
+  function getRandomColor() {
+    return "hsl(" + Math.random() * 360 + ", 100%, 75%)"
+  }
+
+  const addNote = () => {
+    console.log("addNote")
+    if(newNote.value.length < 10) {
+      console.log("newnote < 10")
+      return errorMessage.value = " 10 char or more !! "
+    }
+    notes.value.push({
+      id: Math.floor(Math.random() * 1000000),
+      text: newNote.value,
+      date: new Date(),
+      backgroundColor: getRandomColor()
+    })
+    showModal.value = false
+    newNote.value =''
+    errorMessage.value = ""
+  }
 
 </script>
 
 <template>
   <main>
+    {{ notes }}
     <div v-if="showModal" class="overlay">
       <div class="modal">
-        <textarea name="note" id="" cols="30" rows="10"></textarea>
-        <button>Add Note</button>
-        <button class="close">Close</button>
+        <textarea v-model.trim="newNote" name="note" id="" cols="30" rows="10"></textarea>
+        <p v-if="errorMessage">{{ errorMessage }}</p>
+        <button @click="addNote">Add Note</button>
+        <button @click="showModal = false" class="close">Close</button>
       </div>
     </div>
 
@@ -21,9 +47,12 @@
         <button @click="showModal = true">+</button>
       </header>
       <div class="cards-container">
-        <div class="card">
-          <p class="main-text">Bonjour</p>
-          <p class="date">01/10/2023</p>
+        <div v-for="note in notes" 
+              class="card"
+              :key="note.id"
+              :style="{backgroundColor: note.backgroundColor}">
+          <p class="main-text">{{note.text}}</p>
+          <p class="date">{{ note.date.toLocalDateString("en-US") }}</p>
         </div>
       </div>
   </main>
@@ -125,6 +154,10 @@
   .modal .close {
     background-color: red;
     margin-top: 7px;
+  }
+
+  .modal p {
+    color: red;
   }
 
 </style>
